@@ -1,0 +1,158 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain JSON Records</title>
+</head>
+<body>
+    <h1>Blockchain JSON Records</h1>
+
+    <h2>Add Record</h2>
+    <form id="addRecordForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" required>
+        <button type="submit">Add Record</button>
+    </form>
+
+    <h2>Find Record</h2>
+    <form id="findRecordForm">
+        <label for="findName">Name:</label>
+        <input type="text" id="findName" name="findName" required>
+        <button type="submit">Find Record</button>
+    </form>
+
+    <h2>All Records</h2>
+    <button id="getAllRecordsBtn">Get All Records</button>
+    <pre id="allRecords"></pre>
+
+    <h2>Validate Blockchain</h2>
+    <button id="validateBlockchainBtn">Validate Blockchain</button>
+    <pre id="validationResult"></pre>
+
+    <script>
+        document.getElementById('addRecordForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = event.target.name.value;
+            const age = event.target.age.value;
+            const response = await fetch('/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, age })
+            });
+            const result = await response.json();
+            alert(result.message);
+        });
+
+        document.getElementById('findRecordForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const findName = event.target.findName.value;
+            const response = await fetch('/find', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: findName })
+            });
+            const result = await response.json();
+            alert(result ? JSON.stringify(result) : 'Record not found');
+        });
+
+        document.getElementById('getAllRecordsBtn').addEventListener('click', async () => {
+            const response = await fetch('/records');
+            const records = await response.json();
+            document.getElementById('allRecords').textContent = JSON.stringify(records, null, 2);
+        });
+
+        document.getElementById('validateBlockchainBtn').addEventListener('click', async () => {
+            const response = await fetch('/validate');
+            const validationResult = await response.json();
+            document.getElementById('validationResult').textContent = `Blockchain valid: ${validationResult.isValid}`;
+        });
+    </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain EHR</title>
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@3.1.9-1/crypto-js.js"></script>
+</head>
+<body>
+    <h1>Electronic Health Records Blockchain Demo</h1>
+
+    <h2>Add Record</h2>
+    <form id="addRecordForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" required>
+        <label for="address">Address</label>
+        <input type="text" id="address" name="address" required>
+        <label for="condition">Condition:</label>
+        <input type="text" id="condition" name="condition" required>
+        <label for="hin">Health Insurance Number</label>
+        <input type="number" id="hin" name="hin" required>
+        <label for="notes">Doctor's notes</label>
+        <textarea type="text" id="notes" name="notes" required></textarea>
+        <button type="submit">Add Record</button>
+    </form>
+
+    <h2>All Records</h2>
+    <button id="getAllRecordsBtn">Get All Records</button>
+    <pre id="allRecords"></pre>
+
+    <h2>Validate Blockchain</h2>
+    <button id="validateBlockchainBtn">Validate Blockchain</button>
+    <pre id="validationResult"></pre>
+
+    <script>
+        const username = prompt('Enter your username');
+        const password = prompt('Enter your password');
+
+        const headers = new Headers({
+            'username': username,
+            'password': password,
+            'Content-Type': 'application/json'
+        });
+
+        document.getElementById('addRecordForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = event.target.name.value;
+            const age = event.target.age.value;
+            const address = event.target.address.value
+            const condition = event.target.condition.value;
+            const hin = event.target.hin.value
+            const notes = event.target.notes.value
+
+
+            const data = { name, age, address, condition, hin, notes };
+            const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(data), 'secret key 123').toString();
+
+            const response = await fetch('/add', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ encryptedData })
+            });
+            const result = await response.json();
+            alert(result.message);
+        });
+
+        document.getElementById('getAllRecordsBtn').addEventListener('click', async () => {
+            const response = await fetch('/records', { headers: headers });
+            const records = await response.json();
+            document.getElementById('allRecords').textContent = JSON.stringify(records, null, 2);
+        });
+
+        document.getElementById('validateBlockchainBtn').addEventListener('click', async () => {
+            const response = await fetch('/validate', { headers: headers });
+            const validationResult = await response.json();
+            document.getElementById('validationResult').textContent = `Blockchain valid: ${validationResult.isValid}`;
+        });
+    </script>
+</body>
+</html>
